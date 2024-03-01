@@ -18,7 +18,7 @@ nexttile; im(imag(img_gt)); title('imag'); colorbar;
 sgtitle('Ground Truth')
 
 %% Model 1: Only Fourier Transform
-% Solve Ax = k where A is composed of:
+% Solve A^H * A * x = A^H * k where A is composed of:
 % 1. fft2()
 % 2. fftshift()
 % 3. reshape k-space matrix into vector
@@ -29,7 +29,7 @@ img_recon = reshape(img_recon, [M, N]);
 figure; compareImages(img_gt, img_recon)
 
 %% Model 2: FT and undersample in k-space
-% Solve Ax = k where A is composed of:
+% Solve A^H * A * x = A^H * k where A is composed of:
 % 1. fft2()
 % 2. fftshift()
 % 3. undersample k-space by skipping every other ky line
@@ -41,7 +41,7 @@ img_recon = reshape(img_recon, [M, N]);
 figure; compareImages(img_gt, img_recon)
 
 %% Model 3: FT, undersample, multicoil
-% Solve Ax = k where A is composed of:
+% Solve A^H * A * x = A^H * k where A is composed of:
 % 1. Multiplication of image by each sensitivity map --> Ncoil images
 % 2. For each coil
 %    1. fft2()
