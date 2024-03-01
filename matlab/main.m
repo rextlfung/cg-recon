@@ -17,16 +17,19 @@ nexttile; im(real(img_gt)); title('real'); colorbar;
 nexttile; im(imag(img_gt)); title('imag'); colorbar;
 sgtitle('Ground Truth')
 
+%% Turn image into a vector for pcg
+img_vec = img_gt(:);
+
 %% Model 1: Only Fourier Transform
 % Solve A^H * A * x = A^H * k where A is composed of:
-% 1. fft2()
-% 2. fftshift()
-% 3. reshape k-space matrix into vector
+% 1. Reshaping image vector x into an image
+% 2. Fourier transforming into k-space
+% 3. Reshaping k-space into a vector
 k = model1(img_gt);
 img_recon = pcg(@model1,k);
 img_recon = reshape(img_recon, [M, N]);
 
-figure; compareImages(img_gt, img_recon)
+figure; compareImages(img_gt, img_recon);
 
 %% Model 2: FT and undersample in k-space
 % Solve A^H * A * x = A^H * k where A is composed of:
@@ -38,19 +41,17 @@ k = model2(img_gt);
 img_recon = pcg(@model2,k);
 img_recon = reshape(img_recon, [M, N]);
 
-figure; compareImages(img_gt, img_recon)
+figure; compareImages(img_gt, img_recon);
 
 %% Model 3: FT, undersample, multicoil
 % Solve A^H * A * x = A^H * k where A is composed of:
-% 1. Multiplication of image by each sensitivity map --> Ncoil images
-% 2. For each coil
-%    1. fft2()
-%    2. fftshift()
-%    3. undersample k-space by skipping every other ky line
-%    4. reshape k-space matrix into vector
-% 3. stack all k-space vectors into a single vector
-k = model3(img_gt);
-img_recon = pcg(@model3,k);
-img_recon = reshape(img_recon, [M, N]);
-
-figure; compareImages(img_gt, img_recon)
+% 1. Reshaping image vector x into an image
+% 2. Creating Ncoil copies of the image
+% 3. Weighting each image by each coil's sensitivity map
+% 4. Fourier transforming each coil image into k-space
+% 5. Reshaping k-space into a vector
+model = model3;
+k_vec = model.forward(img_vec);
+img_recon_vec = pcg(@model.both, model.adjoint(k_vec));
+img_recon = reshape(img_recon_vec, [M,N]);
+figure; compareImages(img_gt, img_recon);
