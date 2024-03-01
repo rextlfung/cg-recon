@@ -49,3 +49,8 @@ figure; compareImages(img_gt, img_recon)
 %    3. undersample k-space by skipping every other ky line
 %    4. reshape k-space matrix into vector
 % 3. stack all k-space vectors into a single vector
+k = model3(img_gt);
+img_recon = pcg(@model3,k);
+img_recon = reshape(img_recon, [M, N]);
+
+figure; compareImages(img_gt, img_recon)
