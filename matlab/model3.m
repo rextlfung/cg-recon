@@ -5,24 +5,20 @@ classdef model3
         N
         Ncoils
         smaps
+        sample_mask
     end
 
     methods
         %% Constructor
-        function obj = model3()
-            obj.M = 256;
-            obj.N = 256;
-            obj.Ncoils = 8;
-            
-            smaps = zeros(obj.M, obj.N, obj.Ncoils);
-            ramp = repmat(linspace(0,1,obj.N), [obj.M,1]);
-            for ncoil = 1:obj.Ncoils
-                smaps(:,:,ncoil) = imrotate(ramp, 360*ncoil/obj.Ncoils, 'crop');
-            end
+        function obj = model3(smaps, sample_mask)
+            obj.M = size(smaps, 1);
+            obj.N = size(smaps, 2);
+            obj.Ncoils = size(smaps, 3);
             obj.smaps = smaps;
+            obj.sample_mask = sample_mask;
         end
 
-        %% Forward model
+        %% Forward model 3
         % Input arguments: img as a vector (M*N x 1)
         % Output arguments: multicoil k-space vector (M*N*Ncoils x 1)
         function k_vec = forward(obj, img_vec)
@@ -38,9 +34,7 @@ classdef model3
             k_coils = ifftshift(fft2(fftshift(img_coils)));
         
             % undersampling mask
-            mask = ones(obj.M,obj.N);
-            mask(:,1:2:end) = 0; % skip every other line
-            k_coils = mask .* k_coils;
+            k_coils = obj.sample_mask .* k_coils;
             
             % collapse dimensions one at a time
             %k = reshape(k_coils,[M*N, Ncoils]);
@@ -85,9 +79,7 @@ classdef model3
             k_coils = ifftshift(fft2(fftshift(img_coils)));
         
             % undersampling mask
-            mask = ones(obj.M,obj.N);
-            mask(:,1:2:end) = 0; % skip every other line
-            k_coils = mask .* k_coils;
+            k_coils = obj.sample_mask .* k_coils;
             
             % !! Commented out as it's redundant
             % % collapse dimensions one at a time
