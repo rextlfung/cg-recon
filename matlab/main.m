@@ -75,6 +75,8 @@ k_vec = model.forward(img_vec);
 img_recon_vec = pcg(@model.both, model.adjoint(k_vec));
 img_recon = reshape(img_recon_vec, [M,N]);
 
+img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
+img_us = mean(img_us,3);
 figure; compareImages(img_gt, img_us, img_recon)
 
 %% Model 3a: Model 3 but symmetric undersampling about ky
@@ -96,6 +98,8 @@ k_vec = model.forward(img_vec);
 img_recon_vec = pcg(@model.both, model.adjoint(k_vec));
 img_recon = reshape(img_recon_vec, [M,N]);
 
+img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
+img_us = mean(img_us,3);
 figure; compareImages(img_gt, img_us, img_recon)
 
 %% Model 3b: Model 3 but 3x undersampling
@@ -116,9 +120,11 @@ k_vec = model.forward(img_vec);
 img_recon_vec = pcg(@model.both, model.adjoint(k_vec));
 img_recon = reshape(img_recon_vec, [M,N]);
 
+img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
+img_us = mean(img_us,3);
 figure; compareImages(img_gt, img_us, img_recon)
 
-%% Model 3c: Model 3 but 6/8 partial fourier
+%% Model 3c: Model 3 but 5/8 partial fourier
 % Multicoil images with sensitivity maps
 Ncoils = 8;
 smaps = zeros(M, N, Ncoils);
@@ -128,7 +134,7 @@ for ncoil = 1:Ncoils
 end
 
 % Sampling mask with partial fourier
-pf = 5/8;
+pf = 6/8;
 sample_mask = zeros(M,N);
 sample_mask(:,1:2:N*pf) = 1; % sample every other line with pf
 
@@ -137,5 +143,105 @@ k_vec = model.forward(img_vec);
 img_recon_vec = pcg(@model.both, model.adjoint(k_vec));
 img_recon = reshape(img_recon_vec, [M,N]);
 
+img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
+img_us = mean(img_us,3);
 figure; compareImages(img_gt, img_us, img_recon)
+
+%% Model 3d: Model 3 but 5/8 partial fourier in both kx and ky
+% Multicoil images with sensitivity maps
+Ncoils = 8;
+smaps = zeros(M, N, Ncoils);
+ramp = repmat(linspace(0,1,N), [M,1]);
+for ncoil = 1:Ncoils
+    smaps(:,:,ncoil) = imrotate(ramp, 360*ncoil/Ncoils, 'crop');
+end
+
+% Sampling mask with partial fourier
+pf = 6/8;
+sample_mask = zeros(M,N);
+sample_mask(1:N*pf,1:2:N*pf) = 1; % sample every other line with pf
+
+model = model3(smaps, sample_mask);
+k_vec = model.forward(img_vec);
+img_recon_vec = pcg(@model.both, model.adjoint(k_vec));
+img_recon = reshape(img_recon_vec, [M,N]);
+
+img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
+img_us = mean(img_us,3);
+figure; compareImages(img_gt, img_us, img_recon)
+
+%% Model 3e: Model 3 but grid like sampling (CAIPI)
+% Multicoil images with sensitivity maps
+Ncoils = 8;
+smaps = zeros(M, N, Ncoils);
+ramp = repmat(linspace(0,1,N), [M,1]);
+for ncoil = 1:Ncoils
+    smaps(:,:,ncoil) = imrotate(ramp, 360*ncoil/Ncoils, 'crop');
+end
+
+% Sampling mask
+% sample every other location in kx, ky
+sample_mask = zeros(M,N);
+sample_mask(1:2:M,1:2:N) = 1; 
+sample_mask(2:2:M,2:2:N) = 1;
+
+model = model3(smaps, sample_mask);
+k_vec = model.forward(img_vec);
+img_recon_vec = pcg(@model.both, model.adjoint(k_vec));
+img_recon = reshape(img_recon_vec, [M,N]);
+
+img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
+img_us = mean(img_us,3);
+figure; compareImages(img_gt, img_us, img_recon)
+
+%% Model 3e: Model 3 but grid like sampling (CAIPI) and PF
+% Multicoil images with sensitivity maps
+Ncoils = 8;
+smaps = zeros(M, N, Ncoils);
+ramp = repmat(linspace(0,1,N), [M,1]);
+for ncoil = 1:Ncoils
+    smaps(:,:,ncoil) = imrotate(ramp, 360*ncoil/Ncoils, 'crop');
+end
+
+% Sampling mask with pf in ky
+% sample every other location in kx, ky
+pf = 6/8;
+sample_mask = zeros(M,N);
+sample_mask(1:2:M,1:2:N*pf) = 1; 
+sample_mask(2:2:M,2:2:N*pf) = 1;
+
+model = model3(smaps, sample_mask);
+k_vec = model.forward(img_vec);
+img_recon_vec = pcg(@model.both, model.adjoint(k_vec));
+img_recon = reshape(img_recon_vec, [M,N]);
+
+img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
+img_us = mean(img_us,3);
+figure; compareImages(img_gt, img_us, img_recon)
+
+%% Model 3f: Model 3 but grid like sampling (CAIPI) and PF in both dirs
+% Multicoil images with sensitivity maps
+Ncoils = 8;
+smaps = zeros(M, N, Ncoils);
+ramp = repmat(linspace(0,1,N), [M,1]);
+for ncoil = 1:Ncoils
+    smaps(:,:,ncoil) = imrotate(ramp, 360*ncoil/Ncoils, 'crop');
+end
+
+% Sampling mask with pf in ky
+% sample every other location in kx, ky
+pf = 6/8;
+sample_mask = zeros(M,N);
+sample_mask(1:2:M*pf,1:2:N*pf) = 1; 
+sample_mask(2:2:M*pf,2:2:N*pf) = 1;
+
+model = model3(smaps, sample_mask);
+k_vec = model.forward(img_vec);
+img_recon_vec = pcg(@model.both, model.adjoint(k_vec));
+img_recon = reshape(img_recon_vec, [M,N]);
+
+img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
+img_us = mean(img_us,3);
+figure; compareImages(img_gt, img_us, img_recon)
+
 %% Model 4: FT, undersample, multicoil, and L2-regularization
