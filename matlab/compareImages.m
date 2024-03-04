@@ -9,4 +9,5 @@ function compareImages(img_gt, img_us, img_recon)
     img_diff = img_gt - img_recon;
     nexttile; im(abs(img_diff)); title('Magnitude of diff img'); colorbar;
     MSE = mean(img_diff.^2,'all')
+    SSIM = ssim(abs(img_recon), abs(img_gt))
 end
