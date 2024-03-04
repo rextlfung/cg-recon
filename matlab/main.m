@@ -244,4 +244,39 @@ img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
 figure; compareImages(img_gt, img_us, img_recon)
 
-%% Model 4: FT, undersample, multicoil, and L2-regularization
+%% Model 4: Smaps, FT, 2x us + pf, and L2-regularization
+% Solve A^H * A * x = A^H * k where A is composed of:
+% 1. Reshaping image vector x into an image
+% 2. Creating Ncoil copies of the image
+% 3. Weighting each image by each coil's sensitivity map
+% 4. Fourier transforming each coil image into k-space
+% 5. Reshaping k-space into a vector
+% 6. Multiplying x by regularization term lambda, then concatenating it to
+% the output vector
+
+% Multicoil images with sensitivity maps
+Ncoils = 8;
+smaps = zeros(M, N, Ncoils);
+ramp = repmat(linspace(0,1,N), [M,1]);
+for ncoil = 1:Ncoils
+    smaps(:,:,ncoil) = imrotate(ramp, 360*ncoil/Ncoils, 'crop');
+end
+
+% Sampling mask
+sample_mask = zeros(M,N);
+sample_mask(:,1:2:end) = 1; % sample every 2 lines
+
+% Regularization
+lambda = 1e-6;
+
+model = model4(smaps, sample_mask, lambda);
+y = model.forward(img_vec);
+% Set "observed" regularization output to 0 for L2-regularization
+y((M*N*Ncoils + 1):end) = 0;
+img_recon_vec = pcg(@model.both, model.adjoint(y));
+img_recon = reshape(img_recon_vec, [M,N]);
+
+k_vec = y(1:M*N*Ncoils);
+img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
+img_us = mean(img_us,3);
+figure; compareImages(img_gt, img_us, img_recon)
