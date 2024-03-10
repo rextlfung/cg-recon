@@ -30,8 +30,9 @@ img_recon = reshape(img_recon_vec, [M,N]);
 
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N]))));
 figure; compareImages(img_gt, img_us, img_recon);
+sgtitle('Model 1: Only Fourier Transform')
 
-%% Model 2: FT and 2x undersample in k-space
+%% Model 2: FT and 2x undersample in k_y
 % Solve A^H * A * x = A^H * k where A is composed of:
 % 1. fft2()
 % 2. fftshift()
@@ -49,6 +50,10 @@ img_recon = reshape(img_recon_vec, [M,N]);
 
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N]))));
 figure; compareImages(img_gt, img_us, img_recon);
+sgtitle('Model 2: FT and 2x undersampling in k_y')
+
+figure; im(sample_mask); title('2x undersampling mask');
+xlabel('Frequency encoding'); ylabel('Phase encoding'); 
 
 %% Model 3: FT, 2x undersample, and multicoil
 % Solve A^H * A * x = A^H * k where A is composed of:
@@ -59,7 +64,7 @@ figure; compareImages(img_gt, img_us, img_recon);
 % 5. Reshaping k-space into a vector
 
 % Multicoil images with sensitivity maps
-Ncoils = 8;
+Ncoils = 32;
 smaps = zeros(M, N, Ncoils);
 ramp = repmat(linspace(0,1,N), [M,1]);
 for ncoil = 1:Ncoils
@@ -76,8 +81,9 @@ img_recon_vec = pcg(@model.both, model.adjoint(k_vec));
 img_recon = reshape(img_recon_vec, [M,N]);
 
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
-img_us = mean(img_us,3);
+img_us = mean(img_us,3); % Average the coil images for naive recon
 figure; compareImages(img_gt, img_us, img_recon)
+sgtitle('Model 3: FT, 2x undersample, and multicoil');
 
 %% Model 3a: Model 3 but symmetric undersampling about ky
 % Multicoil images with sensitivity maps
@@ -90,17 +96,22 @@ end
 
 % Sampling mask
 sample_mask = zeros(M,N);
-sample_mask(:,1:2:N/2) = 1; % sample every 2 lines
+sample_mask(:,2:2:N/2) = 1; % sample every 2 lines
 sample_mask(:,(N/2+1):end) = flip(sample_mask(:,1:N/2),2);
 
 model = model3(smaps, sample_mask);
 k_vec = model.forward(img_vec);
 img_recon_vec = pcg(@model.both, model.adjoint(k_vec));
-img_recon = reshape(img_recon_vec, [M,N]);
+img_recon = reshape(img_recon_vec, [M,N]);  
 
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
 figure; compareImages(img_gt, img_us, img_recon)
+sgtitle('Model 3a: Model 3 but symmetric undersampling about ky');
+
+figure; im(sample_mask);
+title('2x undersampling mask, symmetric about ky');
+xlabel('Frequency encoding'); ylabel('Phase encoding');
 
 %% Model 3b: Model 3 but 3x undersampling
 % Multicoil images with sensitivity maps
@@ -123,8 +134,12 @@ img_recon = reshape(img_recon_vec, [M,N]);
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
 figure; compareImages(img_gt, img_us, img_recon)
+sgtitle('Model3b: Model 3 but 3x undersampling');
 
-%% Model 3c: Model 3 but 5/8 partial fourier
+figure; im(sample_mask); title('3x undersampling mask');
+xlabel('Frequency encoding'); ylabel('Phase encoding');
+
+%% Model 3c: Model 3 but 6/8 partial fourier
 % Multicoil images with sensitivity maps
 Ncoils = 8;
 smaps = zeros(M, N, Ncoils);
@@ -146,8 +161,12 @@ img_recon = reshape(img_recon_vec, [M,N]);
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
 figure; compareImages(img_gt, img_us, img_recon)
+sgtitle('Model3c: Model 3 but 6/8 partial fourier in k_y');
 
-%% Model 3d: Model 3 but 5/8 partial fourier in both kx and ky
+figure; im(sample_mask); title('partial fourier undersampling mask');
+xlabel('Frequency encoding'); ylabel('Phase encoding');
+
+%% Model 3d: Model 3 but 6/8 partial fourier in both kx and ky
 % Multicoil images with sensitivity maps
 Ncoils = 8;
 smaps = zeros(M, N, Ncoils);
@@ -169,6 +188,10 @@ img_recon = reshape(img_recon_vec, [M,N]);
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
 figure; compareImages(img_gt, img_us, img_recon)
+sgtitle('Model3d: Model 3 but 6/8 partial fourier in k_x, k_y');
+
+figure; im(sample_mask); title('partial fourier undersampling mask');
+xlabel('Frequency encoding'); ylabel('Phase encoding');
 
 %% Model 3e: Model 3 but grid like sampling (CAIPI)
 % Multicoil images with sensitivity maps
@@ -193,8 +216,12 @@ img_recon = reshape(img_recon_vec, [M,N]);
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
 figure; compareImages(img_gt, img_us, img_recon)
+sgtitle('Model3e: Model 3 but CAIPI like sampling');
 
-%% Model 3e: Model 3 but grid like sampling (CAIPI) and PF
+figure; im(sample_mask); title('CAIPI 2x undersampling mask');
+xlabel('Frequency encoding'); ylabel('Phase encoding');
+
+%% Model 3f: Model 3 but grid like sampling (CAIPI) and PF
 % Multicoil images with sensitivity maps
 Ncoils = 8;
 smaps = zeros(M, N, Ncoils);
@@ -218,8 +245,12 @@ img_recon = reshape(img_recon_vec, [M,N]);
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
 figure; compareImages(img_gt, img_us, img_recon)
+sgtitle('Model3f: Model 3 but CAIPI like sampling and PF');
 
-%% Model 3f: Model 3 but grid like sampling (CAIPI) and PF in both dirs
+figure; im(sample_mask); title('CAIPI and PF 2x undersampling mask');
+xlabel('Frequency encoding'); ylabel('Phase encoding');
+
+%% Model 3g: Model 3 but grid like sampling (CAIPI) and PF in both dirs
 % Multicoil images with sensitivity maps
 Ncoils = 8;
 smaps = zeros(M, N, Ncoils);
@@ -243,19 +274,22 @@ img_recon = reshape(img_recon_vec, [M,N]);
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
 figure; compareImages(img_gt, img_us, img_recon)
+sgtitle('Model3g: Model 3 but CAIPI and PF in both directions');
 
-%% Model 4: Smaps, FT, 2x us + pf, and L2-regularization
+figure; im(sample_mask); title('CAIPI and PF 2x undersampling mask');
+xlabel('Frequency encoding'); ylabel('Phase encoding');
+
+%% Model 4: Smaps, FT, 2x us + pf, and L2-regularization on the image
 % Solve A^H * A * x = A^H * k where A is composed of:
 % 1. Reshaping image vector x into an image
 % 2. Creating Ncoil copies of the image
 % 3. Weighting each image by each coil's sensitivity map
 % 4. Fourier transforming each coil image into k-space
 % 5. Reshaping k-space into a vector
-% 6. Multiplying x by regularization term lambda, then concatenating it to
-% the output vector
+% 6. Computing regularization vector, then concatenating it to output
 
 % Multicoil images with sensitivity maps
-Ncoils = 8;
+Ncoils = 32;
 smaps = zeros(M, N, Ncoils);
 ramp = repmat(linspace(0,1,N), [M,1]);
 for ncoil = 1:Ncoils
@@ -266,13 +300,49 @@ end
 sample_mask = zeros(M,N);
 sample_mask(:,1:2:end) = 1; % sample every 2 lines
 
-% Regularization
-lambda = 1e-6;
+% Regularization weight
+lambda = 1e-3;
 
 model = model4(smaps, sample_mask, lambda);
 y = model.forward(img_vec);
-% Set "observed" regularization output to 0 for L2-regularization
-y((M*N*Ncoils + 1):end) = 0;
+y = y + 4*randn(size(y)); % simulate noise
+y((M*N*Ncoils + 1):end) = 0; % Set "observed" regularization output to 0 for L2-regularization
+img_recon_vec = pcg(@model.both, model.adjoint(y));
+img_recon = reshape(img_recon_vec, [M,N]);
+
+k_vec = y(1:M*N*Ncoils);
+img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
+img_us = mean(img_us,3);
+figure; compareImages(img_gt, img_us, img_recon)
+
+%% Model 5: Model 4 but L2 regularization on TV(x)
+% Solve A^H * A * x = A^H * k where A is composed of:
+% 1. Reshaping image vector x into an image
+% 2. Creating Ncoil copies of the image
+% 3. Weighting each image by each coil's sensitivity map
+% 4. Fourier transforming each coil image into k-space
+% 5. Reshaping k-space into a vector
+% 6. Computing regularization vector, then concatenating it to output
+
+% Multicoil images with sensitivity maps
+Ncoils = 32;
+smaps = zeros(M, N, Ncoils);
+ramp = repmat(linspace(0,1,N), [M,1]);
+for ncoil = 1:Ncoils
+    smaps(:,:,ncoil) = imrotate(ramp, 360*ncoil/Ncoils, 'crop');
+end
+
+% Sampling mask
+sample_mask = zeros(M,N);
+sample_mask(:,1:2:end) = 1; % sample every 2 lines
+
+% Regularization weight
+lambda = 1e-3;
+
+model = model5(smaps, sample_mask, lambda);
+y = model.forward(img_vec);
+y = y + 4*randn(size(y)); % simulate noise
+y((M*N*Ncoils + 1):end) = 0; % Set "observed" regularization output to 0 for L2-regularization
 img_recon_vec = pcg(@model.both, model.adjoint(y));
 img_recon = reshape(img_recon_vec, [M,N]);
 
