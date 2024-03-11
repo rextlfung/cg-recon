@@ -1,5 +1,5 @@
 # CG-SENSE recon practice
-This repo contains code for model-based MRI reconstruction. Specifically, CG-SENSE like recon is implemented using matlab's pcg(), which iteratively solves the problem Ax = y to recover the underlying image x given k-space data y and system model A. Note that this repo is for education purposes and NOT meant to be a high performance solution for MRI reconstruction. Although intially implemented in matlab, I plan to also write julia and python equivalents so this repo can be cloned and used for free.
+This repo contains code for model-based MRI reconstruction. Specifically, CG-SENSE like recon is implemented using matlab's pcg(), which iteratively solves the problem Ah*A*x = Ah*y to recover the underlying image x given k-space data y and system model A. Note that this repo is for education purposes and NOT meant to be a high performance solution for MRI reconstruction. Although intially implemented in matlab, I plan to also write julia and python equivalents so this repo can be cloned and used for free.
 
 # Data
 For simplicity, a 256x256 Shepp-Logan phantom is chosen to be the ground truth, which is Fourier transformed into k-space and retrospectively undersampled. Artifical phase has also been added make the ground truth complex.
