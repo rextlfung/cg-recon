@@ -30,8 +30,8 @@ addpath('~/github/pisco');
 % 4. Fourier transforming each coil image into k-space
 % 5. Reshaping k-space into a vector
 
-% Undersmaple at various factors
-for R = 2:6
+% Undersample at various factors
+for R = 6:6
     sample_mask = zeros(N1,N2);
     sample_mask(:,1:R:end) = 1; % sample every R lines
     k_mc2d_us = sample_mask .* k_mc2d;
@@ -45,7 +45,8 @@ for R = 2:6
     img_us = mean(img_us,3); % Average the coil images for naive recon
     
     img_gt = sum(ifftshift(ifft2(fftshift(k_mc2d))) .* conj(smaps), 3);
-    figure; compareImages(img_gt, img_us, img_recon)
-    title = sprintf('Model 3: FT, %dx undersample, and multicoil', R);
+    figure;
+    [MSE, SSIM] = compareImages(img_gt, img_us, img_recon);
+    title = sprintf('Model 3: FT, %dx undersample, and multicoil. SSIM = %f', R, SSIM);
     sgtitle(title);
 end

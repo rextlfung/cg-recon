@@ -29,7 +29,7 @@ img_recon_vec = pcg(@model.both, model.adjoint(k_vec));
 img_recon = reshape(img_recon_vec, [M,N]);
 
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N]))));
-figure; compareImages(img_gt, img_us, img_recon);
+figure; [MSE, SSIM] = compareImages(img_gt, img_us, img_recon);
 sgtitle('Model 1: Only Fourier Transform')
 
 %% Model 2: FT and 2x undersample in k_y
@@ -49,7 +49,7 @@ img_recon_vec = pcg(@model.both, model.adjoint(k_vec));
 img_recon = reshape(img_recon_vec, [M,N]);
 
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N]))));
-figure; compareImages(img_gt, img_us, img_recon);
+figure; [MSE, SSIM] = compareImages(img_gt, img_us, img_recon);
 sgtitle('Model 2: FT and 2x undersampling in k_y')
 
 figure; im(sample_mask); title('2x undersampling mask');
@@ -82,7 +82,7 @@ img_recon = reshape(img_recon_vec, [M,N]);
 
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3); % Average the coil images for naive recon
-figure; compareImages(img_gt, img_us, img_recon)
+figure; [MSE, SSIM] = compareImages(img_gt, img_us, img_recon);
 sgtitle('Model 3: FT, 2x undersample, and multicoil');
 
 %% Model 3a: Model 3 but symmetric undersampling about ky
@@ -106,7 +106,7 @@ img_recon = reshape(img_recon_vec, [M,N]);
 
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
-figure; compareImages(img_gt, img_us, img_recon)
+figure; [MSE, SSIM] = compareImages(img_gt, img_us, img_recon);
 sgtitle('Model 3a: Model 3 but symmetric undersampling about ky');
 
 figure; im(sample_mask);
@@ -133,7 +133,7 @@ img_recon = reshape(img_recon_vec, [M,N]);
 
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
-figure; compareImages(img_gt, img_us, img_recon)
+figure; [MSE, SSIM] = compareImages(img_gt, img_us, img_recon);
 sgtitle('Model3b: Model 3 but 3x undersampling');
 
 figure; im(sample_mask); title('3x undersampling mask');
@@ -160,7 +160,7 @@ img_recon = reshape(img_recon_vec, [M,N]);
 
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
-figure; compareImages(img_gt, img_us, img_recon)
+figure; [MSE, SSIM] = compareImages(img_gt, img_us, img_recon);
 sgtitle('Model3c: Model 3 but 6/8 partial fourier in k_y');
 
 figure; im(sample_mask); title('partial fourier undersampling mask');
@@ -187,7 +187,7 @@ img_recon = reshape(img_recon_vec, [M,N]);
 
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
-figure; compareImages(img_gt, img_us, img_recon)
+figure; [MSE, SSIM] = compareImages(img_gt, img_us, img_recon);
 sgtitle('Model3d: Model 3 but 6/8 partial fourier in k_x, k_y');
 
 figure; im(sample_mask); title('partial fourier undersampling mask');
@@ -215,7 +215,7 @@ img_recon = reshape(img_recon_vec, [M,N]);
 
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
-figure; compareImages(img_gt, img_us, img_recon)
+figure; [MSE, SSIM] = compareImages(img_gt, img_us, img_recon);
 sgtitle('Model3e: Model 3 but CAIPI like sampling');
 
 figure; im(sample_mask); title('CAIPI 2x undersampling mask');
@@ -244,7 +244,7 @@ img_recon = reshape(img_recon_vec, [M,N]);
 
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
-figure; compareImages(img_gt, img_us, img_recon)
+figure; [MSE, SSIM] = compareImages(img_gt, img_us, img_recon);
 sgtitle('Model3f: Model 3 but CAIPI like sampling and PF');
 
 figure; im(sample_mask); title('CAIPI and PF 2x undersampling mask');
@@ -273,7 +273,7 @@ img_recon = reshape(img_recon_vec, [M,N]);
 
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
-figure; compareImages(img_gt, img_us, img_recon)
+figure; [MSE, SSIM] = compareImages(img_gt, img_us, img_recon);
 sgtitle('Model3g: Model 3 but CAIPI and PF in both directions');
 
 figure; im(sample_mask); title('CAIPI and PF 2x undersampling mask');
@@ -313,7 +313,7 @@ img_recon = reshape(img_recon_vec, [M,N]);
 k_vec = y(1:M*N*Ncoils);
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
-figure; compareImages(img_gt, img_us, img_recon)
+figure; [MSE, SSIM] = compareImages(img_gt, img_us, img_recon);
 
 %% Model 5: Model 4 but L2 regularization on TV(x)
 % Solve A^H * A * x = A^H * k where A is composed of:
@@ -349,4 +349,4 @@ img_recon = reshape(img_recon_vec, [M,N]);
 k_vec = y(1:M*N*Ncoils);
 img_us = ifftshift(ifft2(fftshift(reshape(k_vec, [M,N,Ncoils]))));
 img_us = mean(img_us,3);
-figure; compareImages(img_gt, img_us, img_recon)
+figure; [MSE, SSIM] = compareImages(img_gt, img_us, img_recon);
