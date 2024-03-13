@@ -31,7 +31,7 @@ addpath('~/github/pisco');
 % 5. Reshaping k-space into a vector
 
 % Undersample at various factors
-for R = 6:6
+for R = 2:6
     sample_mask = zeros(N1,N2);
     sample_mask(:,1:R:end) = 1; % sample every R lines
     k_mc2d_us = sample_mask .* k_mc2d;
