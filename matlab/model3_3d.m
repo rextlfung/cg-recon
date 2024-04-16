@@ -115,7 +115,8 @@ classdef model3_3d
             img_coils = ifftshift(data);
         
             % !! Commented out as it's redundant
-            % Divide by sensitivity maps and get back to Ncoil copies of single coi
+            % Divide by sensitivity maps and get back to Ncoil copies of
+            % single coil
             % smaps = zeros(M, N, Ncoils);
             % ramp = repmat(linspace(0,1,N), [M,1]);
             % for ncoil = 1:Ncoils
