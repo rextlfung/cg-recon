@@ -1,5 +1,5 @@
 %% Recon some brain images using CG-SENSE
-clear; close all;
+close all;
 
 fn_ld = '../largeData/D_te1.mat'; % large 3D multicoil file
 fn_sd = '../smallData/k_mc2d.mat'; % small 2D multicoil file
